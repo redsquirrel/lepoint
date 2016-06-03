@@ -1,0 +1,23 @@
+<html>
+<head>
+  <script type="text/javascript" src="http://rawgit.com/ethereum/web3.js/master/dist/web3.min.js"></script>
+
+  <script type="text/javascript">
+    var provider = new Web3.providers.HttpProvider("http://localhost:8545");
+    var web3 = new Web3(provider);
+
+    // TODO
+    var abi;
+    var address;
+
+    var instance = web3.eth.contract(abi).at(address);
+
+    instance.getCampaignNames(function(err, names) {
+      // TODO: Write them to to screen
+    });
+  </script>
+</head>
+<body>
+
+</body>
+</html>
