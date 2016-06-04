@@ -3,6 +3,7 @@ contract LePoint {
     struct Campaign {
         address recipient;
         uint tippingPointWei;
+        uint totalWei;
         address[] contributors;
         mapping (address => uint[]) contributions;
         bool tipped;
@@ -19,6 +20,7 @@ contract LePoint {
         address[] memory c;
         campaigns[name] = Campaign({
             recipient: msg.sender,
+            totalWei: 0,
             tippingPointWei: tippingPoint,
             contributors: c,
             tipped: false
@@ -27,6 +29,7 @@ contract LePoint {
     
     function contributeTo(bytes32 name) {
         Campaign campaign = campaigns[name];
+        campaign.totalWei += msg.value;
         campaign.contributions[msg.sender].push(msg.value);
         campaign.contributors.push(msg.sender);
         
@@ -38,20 +41,18 @@ contract LePoint {
         Campaign campaign = campaigns[name];
         if (campaign.tipped) return;
         
-        uint totalContributedWei;
-        for (uint i = 0; i < campaign.contributors.length; i++) {
-            uint[] contributions = campaign.contributions[campaign.contributors[i]];
-            for (uint j = 0; j < contributions.length; j++) {
-                totalContributedWei += contributions[j];
-            }   
-        }
-        if (totalContributedWei >= campaign.tippingPointWei) {
+        if (campaign.totalWei >= campaign.tippingPointWei) {
             campaign.tipped = true;
-            campaign.recipient.send(totalContributedWei);
+            campaign.recipient.send(campaign.totalWei);
         }
     }
 
     function getCampaignNames() constant returns (bytes32[]) {
         return campaignNames;
+    }
+
+    function getCampaignInfo(bytes32 name) constant returns (address, bool, uint, uint) {
+        Campaign c = campaigns[name];
+        return (c.recipient, c.tipped, c.tippingPointWei, c.totalWei);
     }
 }
