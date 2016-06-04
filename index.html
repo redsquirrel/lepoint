@@ -1,23 +1,76 @@
 <html>
 <head>
   <script type="text/javascript" src="http://rawgit.com/ethereum/web3.js/master/dist/web3.min.js"></script>
-
-  <script type="text/javascript">
-    var provider = new Web3.providers.HttpProvider("http://localhost:8545");
-    var web3 = new Web3(provider);
-
-    // TODO
-    var abi;
-    var address;
-
-    var instance = web3.eth.contract(abi).at(address);
-
-    instance.getCampaignNames(function(err, names) {
-      // TODO: Write them to to screen
-    });
-  </script>
 </head>
 <body>
+
+<h1>New Campaign</h1>
+<form id="new-campaign">
+  <div><label for="name">Campaign Name</label> <input id="name" name="name" /></div>
+  <div><label for="tipping-point">Tipping Point</label> <input id="tipping-point" name="tipping-point" /></div>
+  <input type="submit" value="Submit" />
+</form>
+
+<h1>Campaigns</h1>
+<ul id="campaigns"></ul>
+
+<script type="text/javascript">
+  var web3 = initializeWeb3();
+  var instance = constructInstance(web3);
+  listCampaigns();
+  setupForm();
+
+  function initializeWeb3() {
+    var provider = new Web3.providers.HttpProvider("http://localhost:8545");
+    var web3 = new Web3(provider);
+    web3.eth.getCoinbase(function(err, coinbase) {
+      if (err) console.error(err);
+      web3.eth.defaultAccount = coinbase;
+    });
+    return web3;
+  }
+
+  function constructInstance() {
+    // copied these from the output of `node deploy.js`
+    var abi = [{"constant":false,"inputs":[{"name":"name","type":"bytes32"}],"name":"checkCampaign","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"}],"name":"contributeTo","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"campaignNames","outputs":[{"name":"","type":"bytes32"}],"type":"function"},{"constant":true,"inputs":[],"name":"getCampaignNames","outputs":[{"name":"","type":"bytes32[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes32"}],"name":"campaigns","outputs":[{"name":"recipient","type":"address"},{"name":"tippingPointWei","type":"uint256"},{"name":"tipped","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"},{"name":"tippingPoint","type":"uint256"}],"name":"createCampaign","outputs":[],"type":"function"}];
+    var address = "0xe05eadf153f92d4c4d61e1aa246e5e2a272a493e";
+
+    return web3.eth.contract(abi).at(address);
+  }
+
+  function listCampaigns() {
+    var campaignList = document.getElementById("campaigns");
+    campaignList.innerHTML = "";
+    instance.getCampaignNames(function(err, names) {
+      names.forEach(function(rawName) {
+        var li = document.createElement("li");
+        li.innerText = web3.toAscii(rawName);
+        campaignList.appendChild(li);
+      });
+    });
+  }
+
+  function setupForm() {
+    var form = document.getElementById("new-campaign");
+    form.onsubmit = function() {
+      try {
+        var campaignName = form.elements.name.value;
+        var tippingPoint = form.elements["tipping-point"].value;
+
+        instance.createCampaign(campaignName, tippingPoint, {gas: 2000000}, function(err, result) {
+          // TODO: transaction receipt, then call listCampaigns()
+          console.log(err);
+          console.log(result);
+          console.log(campaignName);
+          console.log(tippingPoint);
+        });
+      } catch(e) {
+        console.error(e);
+      }
+      return false;
+    };
+  }
+</script>
 
 </body>
 </html>

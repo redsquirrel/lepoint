@@ -11,14 +11,14 @@ contract LePoint {
     bytes32[] public campaignNames;
     mapping (bytes32 => Campaign) public campaigns;
 
-    function createCampaign(bytes32 name, address recipient, uint tippingPoint) {
+    function createCampaign(bytes32 name, uint tippingPoint) {
         if (campaigns[name].recipient != 0) throw;
 
         campaignNames.push(name);
         
         address[] memory c;
         campaigns[name] = Campaign({
-            recipient: recipient,
+            recipient: msg.sender,
             tippingPointWei: tippingPoint,
             contributors: c,
             tipped: false
