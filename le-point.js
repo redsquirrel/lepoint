@@ -15,8 +15,9 @@ function initializeWeb3() {
 }
 
 function constructInstance() {
-  // copied these from the output of `node deploy.js`
+  // copied abi+address from the output of `node deploy.js`
   var abi = [{"constant":false,"inputs":[{"name":"name","type":"bytes32"}],"name":"checkCampaign","outputs":[],"type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"}],"name":"contributeTo","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"campaignNames","outputs":[{"name":"","type":"bytes32"}],"type":"function"},{"constant":true,"inputs":[],"name":"getCampaignNames","outputs":[{"name":"","type":"bytes32[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes32"}],"name":"campaigns","outputs":[{"name":"recipient","type":"address"},{"name":"tippingPointWei","type":"uint256"},{"name":"totalWei","type":"uint256"},{"name":"tipped","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"name","type":"bytes32"},{"name":"tippingPoint","type":"uint256"}],"name":"createCampaign","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"name","type":"bytes32"}],"name":"getCampaignInfo","outputs":[{"name":"","type":"address"},{"name":"","type":"bool"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"type":"function"}];
+  // morden
   var address = "0x403d965afb3a0f2b1e8b71cdfece31ceb6808ba7";
 
   return web3.eth.contract(abi).at(address);
