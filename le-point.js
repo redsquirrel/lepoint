@@ -1,5 +1,6 @@
 var web3 = initializeWeb3();
 var instance = constructInstance(web3);
+
 listCampaigns();
 setupCreationForm();
 
@@ -53,30 +54,13 @@ function setupCreationForm() {
       form.reset();
       instance.createCampaign(campaignName, tippingPoint, {gas: 2000000}, function(err, txHash) {
         if (err) return setNotice(err);
-        handleCampaignCreation(campaignName, txHash);
+        handleTx(campaignName+" saved to blockchain.", txHash);
       });
     } catch(e) {
       setNotice(e);
     }
     return false;
   };
-}
-
-function handleCampaignCreation(campaignName, txHash) {
-  var interval = setInterval(function() {
-    web3.eth.getTransactionReceipt(txHash, function(err, receipt) {
-      if (err != null) {
-        clearInterval(interval);
-        setNotice(err);
-      }
-      if (receipt != null) {
-        clearInterval(interval);
-        listCampaigns(); // reload campaign list now that the campaign is created
-        setNotice(campaignName+" saved to blockchain.");
-        setTimeout(function() { setNotice(""); }, 5000);
-      }
-    });
-  }, 1000);
 }
 
 function contribute(form, campaignName) {
@@ -86,7 +70,7 @@ function contribute(form, campaignName) {
     form.reset();
     instance.contributeTo(campaignName, {value: wei, gas: 2000000}, function(err, txHash) {
       if (err) return setNotice(err);
-      handleContribution(campaignName, txHash);
+      handleTx("Contribution to "+campaignName+" saved to blockchain.", txHash);
     });
   } catch (e) {
     setNotice(e);
@@ -94,8 +78,7 @@ function contribute(form, campaignName) {
   return false;
 }
 
-// TODO: DRY this up (see handleCampaignCreation)
-function handleContribution(campaignName, txHash) {
+function handleTx(successMessage, txHash) {
   var interval = setInterval(function() {
     web3.eth.getTransactionReceipt(txHash, function(err, receipt) {
       if (err != null) {
@@ -104,8 +87,8 @@ function handleContribution(campaignName, txHash) {
       }
       if (receipt != null) {
         clearInterval(interval);
-        listCampaigns(); // reload campaign list now that the total value has changed
-        setNotice("Contribution to "+campaignName+" saved to blockchain.");
+        listCampaigns();
+        setNotice(successMessage);
         setTimeout(function() { setNotice(""); }, 5000);
       }
     });
